@@ -1,15 +1,25 @@
--- Indexes for Optimization
-
--- User Table
-CREATE INDEX idx_user_email ON User(email);
-CREATE INDEX idx_user_id ON User(user_id);
-
--- Booking Table
+-- Create indexes on high-usage columns
 CREATE INDEX idx_booking_user_id ON Booking(user_id);
 CREATE INDEX idx_booking_property_id ON Booking(property_id);
-CREATE INDEX idx_booking_dates ON Booking(start_date, end_date);
+CREATE INDEX idx_booking_start_date ON Booking(start_date);
+CREATE INDEX idx_review_property_id ON Review(property_id);
+CREATE INDEX idx_payment_booking_id ON Payment(booking_id);
 
--- Property Table
-CREATE INDEX idx_property_location ON Property(location);
-CREATE INDEX idx_property_id ON Property(property_id);
-CREATE INDEX idx_property_price ON Property(price_per_night);
+
+-- Measure query performance BEFORE indexes
+-- (Assume this is run before creating indexes)
+EXPLAIN ANALYZE
+SELECT b.booking_id, b.start_date, b.end_date, u.username, p.title
+FROM Booking b
+JOIN User u ON b.user_id = u.user_id
+JOIN Property p ON b.property_id = p.property_id
+WHERE b.start_date BETWEEN '2023-01-01' AND '2023-12-31';
+
+
+-- Measure query performance AFTER indexes
+EXPLAIN ANALYZE
+SELECT b.booking_id, b.start_date, b.end_date, u.username, p.title
+FROM Booking b
+JOIN User u ON b.user_id = u.user_id
+JOIN Property p ON b.property_id = p.property_id
+WHERE b.start_date BETWEEN '2023-01-01' AND '2023-12-31';
